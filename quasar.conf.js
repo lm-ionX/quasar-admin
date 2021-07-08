@@ -1,6 +1,8 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 
+const enviromentConfiguration = require('./src/utils/environmentConfig.js');
+
 module.exports = function (ctx) {
   return {
     // app boot file (/src/boot)
@@ -9,7 +11,8 @@ module.exports = function (ctx) {
     boot: [
       'i18n',
       'axios',
-      'apex'
+      'apex',
+      'firebaseConnection'
     ],
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-css
@@ -49,7 +52,7 @@ module.exports = function (ctx) {
       directives: [],
 
       // Quasar plugins
-      plugins: ['AppFullscreen']
+      plugins: ['Loading', 'Notify', 'AppFullscreen']
     },
 
     // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
@@ -66,7 +69,11 @@ module.exports = function (ctx) {
 
       // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
       extendWebpack (cfg) {
-      }
+      },
+
+      env: {
+        QENV: enviromentConfiguration(process.env.QENV)
+      },
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer

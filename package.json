@@ -6,6 +6,7 @@
   "author": "pratikpatelpp802@gmail.com",
   "private": true,
   "scripts": {
+    "dev:win": "cross-env QENV=DEV quasar dev",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
@@ -14,6 +15,7 @@
     "axios": "^0.21.1",
     "core-js": "^3.0.0",
     "echarts": "^4.6.0",
+    "firebase": "^8.6.8",
     "quasar": "^1.15.0",
     "vue-apexcharts": "^1.5.2",
     "vue-echarts-v3": "^2.0.1",
@@ -23,6 +25,8 @@
   "devDependencies": {
     "@quasar/app": "^2.0.0",
     "@quasar/quasar-app-extension-qcalendar": "^3.3.1",
+    "cross-env": "^7.0.3",
+    "dotenv": "^10.0.0",
     "quasar-app-extension-qhierarchy": "^0.0.5"
   },
   "engines": {
