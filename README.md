@@ -19,22 +19,25 @@ Be sure to check out my sponsor page.
 Thank you so much!!!
 
 ## Install the dependencies
+
 ```bash
 npm install
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
+
 ```bash
-quasar dev
+yarn dev:win
 ```
 
-
 ### Build the app for production
+
 ```bash
 quasar build
 ```
 
 ## Screens UI
+
 **Login**
 
 ![Alt text](src/assets/Login.png?raw=true "Screenshot")
@@ -55,18 +58,16 @@ quasar build
 
 ![Alt text](src/assets/Lock-1.png?raw=true "Screenshot")
 
-
 **Lock Screen 2**
 
 ![Alt text](src/assets/Lock-2.png?raw=true "Screenshot")
-
 
 **Pricing**
 
 ![Alt text](src/assets/Pricing.png?raw=true "Screenshot")
 
-
 ### Customize the configuration
+
 See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
 
 ## License

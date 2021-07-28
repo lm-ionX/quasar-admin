@@ -19,7 +19,6 @@ module.exports = (QENV) => {
       messagingSenderId: ENV[`${QENV}_MESSAGING_SENDER_ID`],
       appId: ENV[`${QENV}_APP_ID`],
       measurementId: ENV[`${QENV}_MEASUREMENT_ID`],
-    },
-    API_ENDPOINT: ENV[`${QENV}_API_ENDPOINT`]
+    }
   }
 }

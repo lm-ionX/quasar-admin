@@ -1,5 +1,7 @@
 <template>
   <div class="q-pa-md">
+    <h3 v-if="mode === 'images'">Ajout, Suppression d'images</h3>
+    <h3 v-else>Ajout, Suppression de contenu</h3>
     <div class="q-gutter-y-md">
       <q-card>
         <q-tabs
@@ -20,151 +22,37 @@
         <q-separator />
 
         <q-tab-panels v-model="tab" animated>
-          <q-tab-panel name="artisanat">
-            <div class="text-h6 q-mb-lg">Artisanat</div>
+          <q-tab-panel :name="tab">
+            <div class="text-h6 q-mb-lg">{{ title[tab] }}</div>
 
             <q-select
               standout="bg-teal text-white"
               class="q-mb-lg"
-              v-model="subcat.artisanat"
-              :options="options.artisanat"
+              v-model="subcat[tab]"
+              :options="options[tab]"
               label="Choisir une sous catégorie"
             />
 
             <template v-if="mode === 'images'">
               <q-uploader
-                v-if="subcat.artisanat !== ''"
+                v-if="subcat[tab] !== ''"
                 class="q-mb-lg"
-                url="http://localhost:4444/upload"
+                :factory="uploadImages"
                 label="Ajouter des images"
                 multiple
                 accept=".jpg, image/*"
+                ref="uploader"
                 @rejected="onRejected"
               />
 
               <div
-                v-if="subcat.artisanat !== ''"
+                v-if="subcat[tab] !== ''"
                 class="q-gutter-md row items-start"
               >
+                <q-btn label="Voir la galerie" @click="loadImages()" />
+
                 <q-img
-                  v-for="img in gallery"
-                  :key="img"
-                  transition="fade"
-                  :src="img"
-                  style="width: 150px"
-                  ratio="1"
-                  spinner-color="white"
-                  class="rounded-borders"
-                />
-              </div>
-            </template>
-          </q-tab-panel>
-
-          <q-tab-panel name="industrie">
-            <div class="text-h6 q-mb-lg">Industrie</div>
-            <q-select
-              standout="bg-teal text-white"
-              class="q-mb-lg"
-              v-model="subcat.industrie"
-              :options="options.industrie"
-              label="Choisir une sous catégorie"
-            />
-
-            <template v-if="mode === 'images'">
-              <q-uploader
-                v-if="subcat.industrie !== ''"
-                class="q-mb-lg"
-                url="http://localhost:4444/upload"
-                label="Ajouter des images"
-                multiple
-                accept=".jpg, image/*"
-                @rejected="onRejected"
-              />
-
-              <div
-                v-if="subcat.industrie !== ''"
-                class="q-gutter-md row items-start"
-              >
-                <q-img
-                  v-for="img in gallery"
-                  :key="img"
-                  transition="fade"
-                  :src="img"
-                  style="width: 150px"
-                  ratio="1"
-                  spinner-color="white"
-                  class="rounded-borders"
-                />
-              </div>
-            </template>
-          </q-tab-panel>
-
-          <q-tab-panel name="creation">
-            <div class="text-h6 q-mb-lg">Création</div>
-            <q-select
-              standout="bg-teal text-white"
-              class="q-mb-lg"
-              v-model="subcat.creation"
-              :options="options.creation"
-              label="Choisir une sous catégorie"
-            />
-
-            <template v-if="mode === 'images'">
-              <q-uploader
-                v-if="subcat.creation !== ''"
-                class="q-mb-lg"
-                url="http://localhost:4444/upload"
-                label="Ajouter des images"
-                multiple
-                accept=".jpg, image/*"
-                @rejected="onRejected"
-              />
-
-              <div
-                v-if="subcat.creation !== ''"
-                class="q-gutter-md row items-start"
-              >
-                <q-img
-                  v-for="img in gallery"
-                  :key="img"
-                  transition="fade"
-                  :src="img"
-                  style="width: 150px"
-                  ratio="1"
-                  spinner-color="white"
-                  class="rounded-borders"
-                />
-              </div>
-            </template>
-          </q-tab-panel>
-
-          <q-tab-panel name="ateliers">
-            <div class="text-h6 q-mb-lg">Les Ateliers</div>
-            <q-select
-              standout="bg-teal text-white"
-              class="q-mb-lg"
-              v-model="subcat.ateliers"
-              :options="options.ateliers"
-              label="Choisir une sous catégorie"
-            />
-
-            <template v-if="mode === 'images'">
-              <q-uploader
-                v-if="subcat.ateliers !== ''"
-                class="q-mb-lg"
-                url="http://localhost:4444/upload"
-                label="Ajouter des images"
-                multiple
-                accept=".jpg, image/*"
-                @rejected="onRejected"
-              />
-
-              <div
-                v-if="subcat.ateliers !== ''"
-                class="q-gutter-md row items-start"
-              >
-                <q-img
-                  v-for="img in gallery"
+                  v-for="img in images"
                   :key="img"
                   transition="fade"
                   :src="img"
@@ -183,6 +71,8 @@
 </template>
 
 <script>
+import firebaseServices from "../services/firebase";
+
 export default {
   name: "ChoiceSubCategory",
   props: {
@@ -193,8 +83,15 @@ export default {
   },
   data() {
     return {
+      images: [],
       tab: "artisanat",
       gallery: [],
+      title: {
+        artisanat: "Artisanat",
+        industrie: "Industrie",
+        creation: "Créations",
+        ateliers: "Ateliers"
+      },
       subcat: {
         artisanat: "",
         industrie: "",
@@ -225,12 +122,35 @@ export default {
   },
   methods: {
     onRejected(rejectedEntries) {
-      // Notify plugin needs to be installed
-      // https://quasar.dev/quasar-plugins/notify#Installation
       this.$q.notify({
         type: "negative",
         message: `${rejectedEntries.length} file(s) did not pass validation constraints`
       });
+    },
+    loadImages() {
+      const subcat = this.subcat[this.tab].toLowerCase();
+      const { getImages } = firebaseServices;
+      getImages(this.tab, subcat).then(result => (this.images = result));
+      console.log(this.images);
+    },
+    uploadImages(files) {
+      const subcat = this.subcat[this.tab].toLowerCase();
+      const { saveImages } = firebaseServices;
+      const success = saveImages(this.tab, subcat, files);
+      const uploader = this.$refs.uploader;
+
+      if (success) {
+        this.$q.notify({
+          type: "positive",
+          message: `Vos images ont bien été enregistrées !`
+        });
+        uploader.removeQueuedFiles();
+      } else {
+        this.$q.notify({
+          type: "negative",
+          message: `Une erreur est survenue pendant l'enregistrement !`
+        });
+      }
     }
   }
 };

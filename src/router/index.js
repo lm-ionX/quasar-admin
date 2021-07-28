@@ -35,16 +35,15 @@ export default function (/* { store, ssrContext } */) {
       // Force the app to wait until Firebase has
       // finished its initialization, and handle the
       // authentication state of the user properly
-      await ensureAuthIsInitialized(store)
+      await ensureAuthIsInitialized(store.store);
       if (to.matched.some(record => record.meta.requiresAuth)) {
-        if (isAuthenticated(store)) {
+        if (isAuthenticated(store.store)) {
           next()
         } else {
-          next('/auth/login')
+          next('/Login')
         }
-      } else if ((to.path === '/auth/register' && isAuthenticated(store)) ||
-        (to.path === '/auth/login' && isAuthenticated(store))) {
-        next('/user')
+      } else if (to.path === '/Login' && isAuthenticated(store.store)) {
+        next('/')
       } else {
         next()
       }

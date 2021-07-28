@@ -31,6 +31,6 @@ export const logoutUser = async function () {
 
 export function routeUserToAuth () {
   this.$router.push({
-    path: '/auth/login'
+    path: '/Login'
   })
 }

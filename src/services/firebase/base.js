@@ -1,5 +1,12 @@
 import firebase from 'firebase/app'
+
+// storage
+import 'firebase/storage'
+
+// authentication
 import 'firebase/auth'
+
+import axios from 'axios'
 
 /**
  * Returns Firebase's auth service
@@ -8,6 +15,61 @@ import 'firebase/auth'
  */
 export const auth = () => {
   return firebase.auth()
+}
+
+export const getImages = async (cat, subcat) => {
+  const storage = firebase.storage();
+  const storageRef = storage.ref();
+  const objectRef = storageRef.child(`${cat}/${subcat}/`);
+  let itemsUrl = [];
+
+  objectRef.listAll().then(
+    result => result.items.forEach(
+      item => {
+        item.getDownloadURL().then(response => itemsUrl.push(response));
+      }
+    )
+  );
+
+  return itemsUrl;
+}
+
+export const saveImage = async (cat, subcat, image) => {
+  if(image) {
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
+    const objectRef = storageRef.child(`${cat}/${subcat}/${image.name}`);
+
+    let uploadTask = objectRef.put(image, image.name);
+    uploadTask.on('state_changed', snapshot => {
+        progress += (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log('upload progress is: ' + progress);
+        switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+            console.log('Upload is paused');
+            break;
+            case firebase.storage.TaskState.RUNNING: // or 'running'
+            console.log('Upload is running');
+            break;
+        }
+      }, function(error) {
+      // Handle unsuccessful uploads
+        return false;
+      }, function() {
+        return true;
+      });
+  }
+}
+
+export const saveImages = async (cat, subcat, images) => {
+  if(images && images.length > 0) {
+    let totalProgress = 0;
+    const nbFiles = images.length;
+
+    images.forEach(img => {
+      saveImage(cat, subcat, img);
+    });
+  }
 }
 
 /**
@@ -19,7 +81,7 @@ export const auth = () => {
  * @returns {Promise} - A promise that return firebase.Unsubscribe
  */
 export const ensureAuthIsInitialized = async (store) => {
-  if (store.state.auth.isReady) return true
+  //if (store.state.auth.isReady) return true
   // Create the observer only once on init
   return new Promise((resolve, reject) => {
     // Use a promise to make sure that the router will eventually show the route after the auth is initialized.
@@ -50,7 +112,7 @@ export const fBInit = (config) => {
  * @param  {Object} currentUser - Firebase currentUser
  */
 export const handleOnAuthStateChanged = async (store, currentUser) => {
-  const initialAuthState = isAuthenticated(store)
+  const initialAuthState = isAuthenticated(store.store);
   // Save to the store
   store.commit('auth/setAuthState', {
     isAuthenticated: currentUser !== null,
@@ -69,6 +131,7 @@ export const handleOnAuthStateChanged = async (store, currentUser) => {
  * @return {Boolean} - isAuthenticated
  */
 export const isAuthenticated = (store) => {
+  if(!store) return false;
   return store.state.auth.isAuthenticated
 }
 
